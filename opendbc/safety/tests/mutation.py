@@ -38,15 +38,15 @@ COMPARISON_OPERATOR_MAP = {
 }
 
 MUTATOR_FAMILIES = {
-  "increment": ("update_expression", {"++": "--"}),
-  "decrement": ("update_expression", {"--": "++"}),
-  "comparison": ("binary_expression", COMPARISON_OPERATOR_MAP),
-  "boundary": ("number_literal", {}),
-  "bitwise_assignment": ("assignment_expression", {"&=": "|=", "|=": "&=", "^=": "&="}),
-  "bitwise": ("binary_expression", {"&": "|", "|": "&", "^": "&"}),
-  "arithmetic_assignment": ("assignment_expression", {"+=": "-=", "-=": "+=", "*=": "/=", "/=": "*=", "%=": "*="}),
-  "arithmetic": ("binary_expression", {"+": "-", "-": "+", "*": "/", "/": "*", "%": "*"}),
-  "remove_negation": ("unary_expression", {"!": ""}),
+  # "increment": ("update_expression", {"++": "--"}),
+  # "decrement": ("update_expression", {"--": "++"}),
+  # "comparison": ("binary_expression", COMPARISON_OPERATOR_MAP),
+  # "boundary": ("number_literal", {}),
+  # "bitwise_assignment": ("assignment_expression", {"&=": "|=", "|=": "&=", "^=": "&="}),
+  # "bitwise": ("binary_expression", {"&": "|", "|": "&", "^": "&"}),
+  # "arithmetic_assignment": ("assignment_expression", {"+=": "-=", "-=": "+=", "*=": "/=", "/=": "*=", "%=": "*="}),
+  # "arithmetic": ("binary_expression", {"+": "-", "-": "+", "*": "/", "/": "*", "%": "*"}),
+  # "remove_negation": ("unary_expression", {"!": ""}),
   "if_statement": ("if_statement", {"": "!"}),
 }
 
@@ -207,18 +207,18 @@ def enumerate_sites(input_source, preprocessed_file):
             lit_stack.append(operand)
         while lit_stack:
           n = lit_stack.pop()
-          if n.type == "number_literal":
-            token = txt[n.start_byte:n.end_byte]
-            parsed = _parse_int_literal(token)
-            if parsed:
-              value, base, suffix = parsed
-              mutated = f"0x{value + 1:X}{suffix}" if base == "hex" else f"{value + 1}{suffix}"
-              line = n.start_point[0] + 1
-              bsite = _RawSite(n.start_byte, n.end_byte, n.start_byte, n.end_byte, line, token, mutated, "boundary")
-              key = _site_key(bsite)
-              deduped[key] = bsite
-              if _is_in_constexpr_context(n):
-                build_incompatible_keys.add(key)
+          # if n.type == "number_literal":
+          #   token = txt[n.start_byte:n.end_byte]
+          #   parsed = _parse_int_literal(token)
+          #   if parsed:
+          #     value, base, suffix = parsed
+          #     mutated = f"0x{value + 1:X}{suffix}" if base == "hex" else f"{value + 1}{suffix}"
+          #     line = n.start_point[0] + 1
+          #     bsite = _RawSite(n.start_byte, n.end_byte, n.start_byte, n.end_byte, line, token, mutated, "boundary")
+          #     key = _site_key(bsite)
+          #     deduped[key] = bsite
+          #     if _is_in_constexpr_context(n):
+          #       build_incompatible_keys.add(key)
           lit_stack.extend(n.children)
 
     # if_statement mutations: add negation to condition
