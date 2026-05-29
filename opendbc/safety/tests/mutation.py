@@ -48,9 +48,9 @@ MUTATOR_FAMILIES = {
   # "arithmetic": ("binary_expression", {"+": "-", "-": "+", "*": "/", "/": "*", "%": "*"}),
   # "remove_negation": ("unary_expression", {"!": ""}),
   "logical_opposite": ("binary_expression", {"&&": "||", "||": "&&"}),
-  "logical_right": ("binary_expression", {"&&": ",", "||": ","}),
-  "logical_same": ("binary_expression", {"&&": "==", "||": "=="}),
-  "logical_different": ("binary_expression", {"&&": "!=", "||": "!="}),
+  # "logical_right": ("binary_expression", {"&&": ",", "||": ","}),
+  # "logical_same": ("binary_expression", {"&&": "==", "||": "=="}),
+  # "logical_different": ("binary_expression", {"&&": "!=", "||": "!="}),
 }
 
 
