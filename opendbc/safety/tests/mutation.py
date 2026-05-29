@@ -38,16 +38,19 @@ COMPARISON_OPERATOR_MAP = {
 }
 
 MUTATOR_FAMILIES = {
-  "increment": ("update_expression", {"++": "--"}),
-  "decrement": ("update_expression", {"--": "++"}),
-  "comparison": ("binary_expression", COMPARISON_OPERATOR_MAP),
-  "boundary": ("number_literal", {}),
-  "bitwise_assignment": ("assignment_expression", {"&=": "|=", "|=": "&=", "^=": "&="}),
-  "bitwise": ("binary_expression", {"&": "|", "|": "&", "^": "&"}),
-  "arithmetic_assignment": ("assignment_expression", {"+=": "-=", "-=": "+=", "*=": "/=", "/=": "*=", "%=": "*="}),
-  "arithmetic": ("binary_expression", {"+": "-", "-": "+", "*": "/", "/": "*", "%": "*"}),
-  "remove_negation": ("unary_expression", {"!": ""}),
-  "logical": ("binary_expression", {"&&": "||", "||": "&&"}),
+  # "increment": ("update_expression", {"++": "--"}),
+  # "decrement": ("update_expression", {"--": "++"}),
+  # "comparison": ("binary_expression", COMPARISON_OPERATOR_MAP),
+  # "boundary": ("number_literal", {}),
+  # "bitwise_assignment": ("assignment_expression", {"&=": "|=", "|=": "&=", "^=": "&="}),
+  # "bitwise": ("binary_expression", {"&": "|", "|": "&", "^": "&"}),
+  # "arithmetic_assignment": ("assignment_expression", {"+=": "-=", "-=": "+=", "*=": "/=", "/=": "*=", "%=": "*="}),
+  # "arithmetic": ("binary_expression", {"+": "-", "-": "+", "*": "/", "/": "*", "%": "*"}),
+  # "remove_negation": ("unary_expression", {"!": ""}),
+  "logical_opposite": ("binary_expression", {"&&": "||", "||": "&&"}),
+  "logical_right": ("binary_expression", {"&&": ","}, {"||": ","}),
+  "logical_same": ("binary_expression", {"&&": "=="}, {"||": "=="}),
+  "logical_different": ("binary_expression", {"&&": "!="}, {"||": "!="}),
 }
 
 
