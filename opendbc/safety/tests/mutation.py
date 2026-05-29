@@ -47,6 +47,7 @@ MUTATOR_FAMILIES = {
   "arithmetic_assignment": ("assignment_expression", {"+=": "-=", "-=": "+=", "*=": "/=", "/=": "*=", "%=": "*="}),
   "arithmetic": ("binary_expression", {"+": "-", "-": "+", "*": "/", "/": "*", "%": "*"}),
   "remove_negation": ("unary_expression", {"!": ""}),
+  "logical": ("binary_expression", {"&&": "||", "||": "&&"}),
 }
 
 
