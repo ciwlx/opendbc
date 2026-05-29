@@ -210,18 +210,18 @@ def enumerate_sites(input_source, preprocessed_file):
             lit_stack.append(operand)
         while lit_stack:
           n = lit_stack.pop()
-          if n.type == "number_literal":
-            token = txt[n.start_byte:n.end_byte]
-            parsed = _parse_int_literal(token)
-            if parsed:
-              value, base, suffix = parsed
-              mutated = f"0x{value + 1:X}{suffix}" if base == "hex" else f"{value + 1}{suffix}"
-              line = n.start_point[0] + 1
-              bsite = _RawSite(n.start_byte, n.end_byte, n.start_byte, n.end_byte, line, token, mutated, "boundary")
-              key = _site_key(bsite)
-              deduped[key] = bsite
-              if _is_in_constexpr_context(n):
-                build_incompatible_keys.add(key)
+          # if n.type == "number_literal":
+          #   token = txt[n.start_byte:n.end_byte]
+          #   parsed = _parse_int_literal(token)
+          #   if parsed:
+          #     value, base, suffix = parsed
+          #     mutated = f"0x{value + 1:X}{suffix}" if base == "hex" else f"{value + 1}{suffix}"
+          #     line = n.start_point[0] + 1
+          #     bsite = _RawSite(n.start_byte, n.end_byte, n.start_byte, n.end_byte, line, token, mutated, "boundary")
+          #     key = _site_key(bsite)
+          #     deduped[key] = bsite
+          #     if _is_in_constexpr_context(n):
+          #       build_incompatible_keys.add(key)
           lit_stack.extend(n.children)
 
     # Operator mutations: any node with an operator child
