@@ -38,17 +38,16 @@ COMPARISON_OPERATOR_MAP = {
 }
 
 MUTATOR_FAMILIES = {
-  # "increment": ("update_expression", {"++": "--"}),
-  # "decrement": ("update_expression", {"--": "++"}),
-  # "comparison": ("binary_expression", COMPARISON_OPERATOR_MAP),
-  # "boundary": ("number_literal", {}),
-  # "bitwise_assignment": ("assignment_expression", {"&=": "|=", "|=": "&=", "^=": "&="}),
-  # "bitwise": ("binary_expression", {"&": "|", "|": "&", "^": "&"}),
-  # "arithmetic_assignment": ("assignment_expression", {"+=": "-=", "-=": "+=", "*=": "/=", "/=": "*=", "%=": "*="}),
-  # "arithmetic": ("binary_expression", {"+": "-", "-": "+", "*": "/", "/": "*", "%": "*"}),
-  # "remove_negation": ("unary_expression", {"!": ""}),
-  # "logical_opposite": ("binary_expression", {"&&": "||", "||": "&&"}),
-  "logical_different": ("binary_expression", {"&&": "==", "||": "!="}),
+  "increment": ("update_expression", {"++": "--"}),
+  "decrement": ("update_expression", {"--": "++"}),
+  "comparison": ("binary_expression", COMPARISON_OPERATOR_MAP),
+  "boundary": ("number_literal", {}),
+  "bitwise_assignment": ("assignment_expression", {"&=": "|=", "|=": "&=", "^=": "&="}),
+  "bitwise": ("binary_expression", {"&": "|", "|": "&", "^": "&"}),
+  "arithmetic_assignment": ("assignment_expression", {"+=": "-=", "-=": "+=", "*=": "/=", "/=": "*=", "%=": "*="}),
+  "arithmetic": ("binary_expression", {"+": "-", "-": "+", "*": "/", "/": "*", "%": "*"}),
+  "remove_negation": ("unary_expression", {"!": ""}),
+  "if_statement": ("if_statement", {"": "!"}),
 }
 
 
@@ -208,19 +207,30 @@ def enumerate_sites(input_source, preprocessed_file):
             lit_stack.append(operand)
         while lit_stack:
           n = lit_stack.pop()
-          # if n.type == "number_literal":
-          #   token = txt[n.start_byte:n.end_byte]
-          #   parsed = _parse_int_literal(token)
-          #   if parsed:
-          #     value, base, suffix = parsed
-          #     mutated = f"0x{value + 1:X}{suffix}" if base == "hex" else f"{value + 1}{suffix}"
-          #     line = n.start_point[0] + 1
-          #     bsite = _RawSite(n.start_byte, n.end_byte, n.start_byte, n.end_byte, line, token, mutated, "boundary")
-          #     key = _site_key(bsite)
-          #     deduped[key] = bsite
-          #     if _is_in_constexpr_context(n):
-          #       build_incompatible_keys.add(key)
+          if n.type == "number_literal":
+            token = txt[n.start_byte:n.end_byte]
+            parsed = _parse_int_literal(token)
+            if parsed:
+              value, base, suffix = parsed
+              mutated = f"0x{value + 1:X}{suffix}" if base == "hex" else f"{value + 1}{suffix}"
+              line = n.start_point[0] + 1
+              bsite = _RawSite(n.start_byte, n.end_byte, n.start_byte, n.end_byte, line, token, mutated, "boundary")
+              key = _site_key(bsite)
+              deduped[key] = bsite
+              if _is_in_constexpr_context(n):
+                build_incompatible_keys.add(key)
           lit_stack.extend(n.children)
+
+    # if_statement mutations: add negation to condition
+    if kind == "if_statement":
+      condition = node.child_by_field_name("condition")
+      if condition:
+        line = condition.start_point[0] + 1
+        site = _RawSite(condition.start_byte, condition.end_byte, condition.start_byte, condition.start_byte, line, "", "!", "if_statement")
+        key = _site_key(site)
+        deduped[key] = site
+        if _is_in_constexpr_context(node):
+          build_incompatible_keys.add(key)
 
     # Operator mutations: any node with an operator child
     op_child = node.child_by_field_name("operator")
@@ -440,6 +450,13 @@ def _instrument_source(source, sites):
     parts.append(seg)
 
     expr_text = "".join(parts)
+    
+    # Handle if_statement mutations (negation prepended)
+    if site.mutator == "if_statement":
+      mutated_expr = f"!({expr_text})"
+      return f"((__mutation_active_id == {site.site_id}) ? ({mutated_expr}) : ({expr_text}))"
+    
+    # Handle operator mutations (operator replaced)
     op_len = site.op_end - site.op_start
     assert op_rel is not None and expr_text[op_rel : op_rel + op_len] == site.original_op, (
       f"Operator mismatch (site_id={site.site_id}): expected {site.original_op!r} at offset {op_rel}"
